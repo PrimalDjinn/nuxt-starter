@@ -1,0 +1,51 @@
+{
+    "name": "Nuxt Analytics (F.E)",
+    "dockerComposeFile": [
+        "../docker-compose.yml"
+    ],
+    "service": "web",
+    "workspaceFolder": "/nuxt",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "launch": {
+                    "version": "0.2.0",
+                    "configurations": [
+                        {
+                            "name": "pnpm dev",
+                            "request": "launch",
+                            "runtimeArgs": [
+                                "run",
+                                "dev"
+                            ],
+                            "runtimeExecutable": "pnpm",
+                            "skipFiles": [
+                                "<node_internals>/**"
+                            ],
+                            "type": "node",
+                            "console": "integratedTerminal"
+                        }
+                    ],
+                    "compounds": []
+                }
+            },
+            "extensions": [
+                "Vue.volar",
+                "atommaterial.a-file-icon-vscode",
+                "ms-azuretools.vscode-docker",
+                "eamodio.gitlens",
+                "VisualStudioExptTeam.vscodeintellicode",
+                "VisualStudioExptTeam.intellicode-api-usage-examples",
+                "doggy8088.quicktype-refresh",
+                "cweijan.vscode-postgresql-client",
+                "mtxr.sqltools",
+                "bradlc.vscode-tailwindcss",
+                "redhat.vscode-yaml",
+                "ms-azuretools.vscode-docker"
+            ]
+        }
+    },
+    "forwardPorts": [
+        3000
+    ]
+}
