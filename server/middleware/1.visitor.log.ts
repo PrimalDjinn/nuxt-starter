@@ -1,6 +1,6 @@
 import type { H3Event } from "h3"
 
-function anouncer() {
+function announcer() {
     let time_start: number;
     return {
         handler(context: H3Event) {
@@ -12,4 +12,4 @@ function anouncer() {
     }
 }
 
-export default defineEventHandler(anouncer())
+export default defineEventHandler(announcer())
