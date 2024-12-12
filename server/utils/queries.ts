@@ -1,5 +1,4 @@
-import { and, eq, or, SQL } from "drizzle-orm";
-import type { TableConfig } from "drizzle-orm";
+import { and, eq, or, SQL, type TableConfig } from "drizzle-orm";
 
 type JoinStrategy = 'AND' | 'OR';
 function q<T extends TableConfig>(

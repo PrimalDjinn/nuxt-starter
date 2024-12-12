@@ -1,17 +1,42 @@
 import consola from "consola"
+import { isDevelopment } from "../../server/utils/env";
 
-// At some point this will fail with nuxt instance not found.
-// There are known issues with composables.
-export const useAsyncState = async <T>(key: string, fn: () => Promise<T>, options?: {
-    errors: Ref<Array<any>>
-}) => {
-    const { data: initial } = useNuxtData(key)
-    if (initial.value) return Promise.resolve(initial as Ref<T>)
-    const { data: _new, error } = await useAsyncData<T>(key, fn)
-    if (error && options?.errors) {
-        consola.error("An error occurred while fetching data for", key)
-        consola.error(error)
-        options.errors.value.push(error)
+type Result<T> = T | undefined;
+type Error = any | undefined;
+type Return<T> = { data: Ref<Result<T>>; error: Error };
+export const useAsyncState = async <T>(
+  key: string,
+  fn: () => Promise<T>
+): Promise<Return<T>> => {
+  async function pull() {
+    return fn()
+      .then((data) => ({ result: data, error: undefined }))
+      .catch((e) => ({ result: undefined, error: e }));
+  }
+
+  if (tryUseNuxtApp()) {
+    const { data: initial } = useNuxtData(key);
+    if (initial.value)
+      return Promise.resolve({ data: initial as Ref<T>, error: undefined });
+
+    const { result, error } = await pull();
+    initial.value = result;
+    if (error) {
+      consola.error("An error occurred while fetching data for", key);
+      consola.error(error);
     }
-    return _new as Ref<T>
-}
+    return { data: initial, error };
+  } else {
+    if (isDevelopment) {
+      consola.warn(
+        "Nuxt instance not found, re-executing initialisation function and discarding results right after." +
+          " There is no state thus, results will not be re-used, please check your implementation." +
+          " This has a low likelihood of being a Nuxt error, well unless you are an idiot, you idiot."
+      );
+    }
+
+    const { result, error } = await pull();
+
+    return { data: ref(result) as Ref<typeof result>, error };
+  }
+};
