@@ -27,4 +27,3 @@ export type TableWithColumns<T extends TableConfig> = Table<T> & {
   [Key in keyof T['columns']]: T['columns'][Key];
 };
 
-export type Partial<T> = { [P in keyof T]?: T[P] | null | undefined; }

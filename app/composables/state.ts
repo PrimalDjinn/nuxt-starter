@@ -1,17 +1,21 @@
-import consola from "consola"
+import consola from "consola";
 import { isDevelopment } from "../../server/utils/env";
 
 type Result<T> = T | undefined;
 type Error = any | undefined;
 type Return<T> = { data: Ref<Result<T>>; error: Error };
+
 export const useAsyncState = async <T>(
   key: string,
   fn: () => Promise<T>
 ): Promise<Return<T>> => {
   async function pull() {
-    return fn()
-      .then((data) => ({ result: data, error: undefined }))
-      .catch((e) => ({ result: undefined, error: e }));
+    try {
+      const data = await fn();
+      return { result: data, error: undefined };
+    } catch (error) {
+      return Promise.resolve({ error: error as Error, result: undefined });
+    }
   }
 
   if (tryUseNuxtApp()) {
@@ -36,7 +40,7 @@ export const useAsyncState = async <T>(
     }
 
     const { result, error } = await pull();
-
+    consola.log("result", result, error);
     return { data: ref(result) as Ref<typeof result>, error };
   }
 };
