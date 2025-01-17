@@ -15,10 +15,10 @@ export default defineNitroPlugin(app => {
 
     global.clients!.on("error", (error, client) => {
         const response = {
-            statusCode: 400,
-            type: TYPE.ERROR,
-            body: "Invalid Json"
-        } as SocketTemplate
+          statusCode: 400,
+          type: TYPE.ERROR,
+          value: "Invalid Json",
+        } as SocketTemplate;
         client.send(response)
         client.close()
         console.error("Error", error)
