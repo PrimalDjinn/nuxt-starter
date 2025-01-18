@@ -28,5 +28,6 @@ export default defineNuxtConfig({
     secretKey: "",
   },
 
-  experimental: {}
+  experimental: {},
+  modules: ["@nuxtjs/tailwindcss"]
 });
