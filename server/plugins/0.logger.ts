@@ -10,4 +10,5 @@ export default defineNitroPlugin(() => {
     enumerable: true,
     configurable: false,
   });
+  log.info
 });

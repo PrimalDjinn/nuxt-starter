@@ -1,10 +1,4 @@
-import {
-  createConsola,
-  type ConsolaInstance,
-  type LogObject,
-  type ConsolaOptions,
-  consola,
-} from "consola";
+import { createConsola, type ConsolaInstance } from "consola";
 
 declare global {
   var log: ConsolaInstance;
