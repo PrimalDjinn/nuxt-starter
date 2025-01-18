@@ -1,9 +1,4 @@
 import { createConsola } from "consola";
-import type { ConsolaInstance } from "consola";
-
-declare global {
-  var log: ConsolaInstance;
-}
 
 export default defineNitroPlugin(() => {
   Object.defineProperty(global, "log", {
