@@ -1,2 +1,2 @@
 import type { ConsolaInstance } from "consola";
-export declare var log: ConsolaInstance;
+export var log: ConsolaInstance;
