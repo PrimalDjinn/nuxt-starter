@@ -1,35 +1,24 @@
-import type { TableConfig, Table } from "drizzle-orm"
+import type { ConsolaInstance } from "consola";
 
-export type TypeFromLiteral<T> =
-  T extends 'string' ? string :
-  T extends 'number' ? number :
-  T extends 'boolean' ? boolean :
-  T extends 'bigint' ? bigint :
-  T extends 'float' ? number :
-  T extends 'double' ? number :
-  T extends 'real' ? number :
-  T extends 'date' ? Date :
-  T extends 'datetime' ? Date :
-  T extends 'timestamp' ? Date :
-  T extends 'blob' ? Buffer :
-  T extends 'buffer' ? Buffer :
-  T extends 'json' ? any :
-  T extends 'jsonb' ? any :
-  T extends 'array' ? any[] :
-  T extends 'object' ? Record<string, any> :
-  never;
+export type MergeTypes<
+  TypesArray extends any[],
+  Res = {}
+> = TypesArray extends [infer Head, ...infer Rem]
+  ? MergeTypes<Rem, Res & Head>
+  : Res;
+export type OnlyFirst<F, S> = F & { [Key in keyof Omit<S, keyof F>]?: never };
+export type OneOf<
+  TypesArray extends any[],
+  Res = never,
+  AllProperties = MergeTypes<TypesArray>
+> = TypesArray extends [infer Head, ...infer Rem]
+  ? OneOf<Rem, Res | OnlyFirst<Head, AllProperties>, AllProperties>
+  : Res;
 
-export type TableWithFields<T extends TableConfig> = {
-  [Key in keyof T['columns']]: TypeFromLiteral<T['columns'][Key]['dataType']> | null
-};
-
-export type TableWithColumns<T extends TableConfig> = Table<T> & {
-  [Key in keyof T['columns']]: T['columns'][Key];
-};
-
-export type SocketTemplate<T = any> = {
-  statusCode: number;
-  type: TYPE;
-  value?: T;
-  channel?: string;
-};
+declare global {
+  namespace NodeJS {
+    interface Global {
+      log: ConsolaInstance;
+    }
+  }
+}

@@ -16,9 +16,13 @@ export default defineWebSocketHandler({
   close(peer: Peer, event) {
     const client = new WsClient(peer, SocketStatus.CLOSED);
     client.emit("end", event);
+    client.close()
+    log.warn("Force closing Ws Connection")
   },
   error(peer: Peer, error) {
     const client = new WsClient(peer, SocketStatus.CLOSED);
     client.emit("error", error);
+    client.close()
+    log.warn("Force closing Ws Connection");
   },
 });

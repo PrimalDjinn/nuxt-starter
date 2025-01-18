@@ -54,7 +54,7 @@ class SSE implements _RealTime {
   private _backpressure: any[] = [];
   private _status: SocketStatus = SocketStatus.CLOSED;
   constructor() {
-    const eventSource = new EventSource("/sse/get");
+    const eventSource = new EventSource("/realtime/sse/get");
     this.eventSource = eventSource;
     this._events = {
       data: [],
@@ -162,7 +162,7 @@ class Poll implements _RealTime {
   }
   setup(): void {
     this.interval = setInterval(async () => {
-      await $fetch<string>("/poll/get", {
+      await $fetch<string>("/realtime/poll/get", {
         method: "GET",
       })
         .then((response) => {

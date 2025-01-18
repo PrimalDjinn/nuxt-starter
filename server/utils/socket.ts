@@ -1,9 +1,8 @@
 import { ulid } from "ulid";
-import { H3Event } from "h3";
+import { H3Event, type EventStream } from "h3";
 import { Peer } from "crossws";
 
 /* TODO: Production considerations
- * - Remove history memory hog, instead replace with booleans tha check if the event has been emitted and emit immediately?? Maybe???
  * - Ensure auto remove clients from channels on disconnect, or dump to redis
  * - Implement a way to handle backpressure via redis
  * - Implement a way to handle backpressure via queues and workers???
@@ -15,15 +14,9 @@ export class Clients extends Map<string, Client> {
     EventStrings,
     Array<(data: any, client: Client) => void>
   >;
-  private _history: Record<EventStrings, any>;
   constructor() {
     super();
     this._events = {
-      data: [],
-      error: [],
-      end: [],
-    };
-    this._history = {
       data: [],
       error: [],
       end: [],
@@ -67,13 +60,9 @@ export class Clients extends Map<string, Client> {
 
   on(event: EventStrings, callback: (data: any, client: Client) => void) {
     this._events[event].push(callback);
-    this._history[event].forEach((_data: { data: any; client: Client }) =>
-      callback(_data.data, _data.client)
-    );
   }
 
   emit(event: EventStrings, data: any, client: Client) {
-    this._history[event].push({ data, client });
     this._events[event].forEach((callback) => callback(data, client));
   }
 
@@ -195,7 +184,6 @@ export class Channel {
 
 export class Client {
   public channels: Channels = new Channels();
-  private interval: NodeJS.Timeout | null = null;
   private _events: Record<EventStrings, Array<(data: SocketTemplate) => void>>;
   protected _backpressure: any[] = [];
   private _status: SocketStatus = SocketStatus.UNKNOWN;
@@ -275,13 +263,6 @@ export class Client {
       this._events![event].forEach((callback) => callback(data));
     }
   }
-  broadcast(data: any) {
-    global.clients!.forEach((client) => {
-      if (client.id !== this.id) {
-        client.send(data);
-      }
-    });
-  }
   get value(): any {
     throw new Error("Method not implemented.");
   }
@@ -299,9 +280,6 @@ export class Client {
   }
   toString() {
     throw new Error("Method not implemented.");
-  }
-  [Symbol.dispose]() {
-    clearInterval(this.interval!);
   }
 }
 
@@ -390,68 +368,17 @@ export class WsClient extends Client {
   override close() {
     this.value.terminate();
     this.status = SocketStatus.CLOSED;
-    global.clients!.removeClient(this.id);
+    global.clients?.removeClient(this.id);
+  }
+
+  [Symbol.dispose]() {
+    this.close();
+    this._backpressure = [];
   }
 
   override toString() {
     return `WS Client ${this.id}`;
   }
-}
-
-interface EventStreamOptions {
-  /**
-   * Automatically close the writable stream when the request is closed
-   *
-   * Default is `true`
-   */
-  autoclose?: boolean;
-}
-
-/**
- * See https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#fields
- */
-interface EventStreamMessage {
-  id?: string;
-  event?: string;
-  retry?: number;
-  data: string;
-}
-
-declare class EventStream {
-  private readonly _h3Event;
-  private readonly _transformStream;
-  private readonly _writer;
-  private readonly _encoder;
-  private _writerIsClosed;
-  private _paused;
-  private _unsentData;
-  private _disposed;
-  private _handled;
-  constructor(event: Event, opts?: EventStreamOptions);
-  /**
-   * Publish new event(s) for the client
-   */
-  push(message: string): Promise<void>;
-  push(message: string[]): Promise<void>;
-  push(message: EventStreamMessage): Promise<void>;
-  push(message: EventStreamMessage[]): Promise<void>;
-  private _sendEvent;
-  private _sendEvents;
-  pause(): void;
-  get isPaused(): boolean;
-  resume(): Promise<void>;
-  flush(): Promise<void>;
-  /**
-   * Close the stream and the connection if the stream is being sent to the client
-   */
-  close(): Promise<void>;
-  /**
-   * Triggers callback when the writable stream is closed.
-   * It is also triggered after calling the `close()` method.
-   * It also triggers when the request connection has been closed by either the client or the server.
-   */
-  onClosed(cb: () => any): void;
-  send(): Promise<void>;
 }
 
 export class SseClient extends Client {
@@ -501,7 +428,6 @@ export class SseClient extends Client {
     this.eventStream?.onClosed(() => {
       this.status = SocketStatus.CLOSED;
       this.close();
-      this.emit("end", null);
     });
     try {
       this.eventStream?.send();
@@ -563,11 +489,11 @@ export class SseClient extends Client {
   override close() {
     this.eventStream?.close();
     this.status = SocketStatus.CLOSED;
-    global.clients!.removeClient(this.id!);
+    global.clients?.removeClient(this.id!);
     this.emit("end", null);
   }
 
-  override [Symbol.dispose]() {
+  [Symbol.dispose]() {
     this.eventStream?.close();
   }
 
@@ -614,7 +540,7 @@ export class PollClient extends Client {
   private setup(event: H3Event) {
     this._id = ulid();
     setCookie(event, "X-Request-Id", this._id);
-    global.clients!.push(this);
+    global.clients?.push(this);
     this.on("data", (data) => {
       switch (data.type) {
         case TYPE.AUTH_RES:
@@ -648,12 +574,13 @@ export class PollClient extends Client {
   }
 
   override close() {
-    global.clients!.removeClient(this.id);
+    global.clients?.removeClient(this.id);
     this.emit("end", null);
   }
 
-  override [Symbol.dispose]() {
+  [Symbol.dispose]() {
     this._H3Event!.node.res.end();
+    this._backpressure = [];
   }
 
   override toString() {

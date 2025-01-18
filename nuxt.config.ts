@@ -29,4 +29,5 @@ export default defineNuxtConfig({
   },
 
   experimental: {},
+  modules: ["@nuxtjs/tailwindcss"],
 });
