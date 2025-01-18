@@ -2,11 +2,7 @@ import { createConsola } from "consola";
 import type { ConsolaInstance } from "consola";
 
 declare global {
-  namespace NodeJS {
-    interface Global {
-      log: ConsolaInstance;
-    }
-  }
+  var log: ConsolaInstance;
 }
 
 export default defineNitroPlugin(() => {
