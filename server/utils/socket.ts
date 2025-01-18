@@ -407,13 +407,13 @@ export class SseClient extends Client {
     } else {
       const client = global.clients!.getClient(id!);
       if (client) {
-        readBody(event).then((data) => {
+        readBody(event).then((data: any) => {
           client.emit("data", data);
           event.respondWith(new Response(null, { status: 204 }));
         });
       } else {
         this.setup(event);
-        readBody(event).then((data) => {
+        readBody(event).then((data: any) => {
           this.emit("data", data);
           event.respondWith(new Response(null, { status: 204 }));
         });
@@ -530,7 +530,7 @@ export class PollClient extends Client {
         new Response(JSON.stringify(this.data), { status: 200 })
       );
     } else {
-      readBody(event).then((data) => {
+      readBody(event).then((data: any) => {
         this.emit("data", data);
         this._H3Event?.respondWith(new Response(null, { status: 204 }));
       });

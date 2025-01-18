@@ -23,11 +23,5 @@ export default defineNuxtConfig({
       dirs: [join(cwd, "./shared/utils"), join(cwd, "./shared/types")],
     },
   },
-
-  runtimeConfig: {
-    secretKey: "",
-  },
-
-  experimental: {},
-  modules: ["@nuxtjs/tailwindcss"]
+  modules: ["@nuxtjs/tailwindcss"],
 });
