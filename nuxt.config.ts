@@ -24,4 +24,11 @@ export default defineNuxtConfig({
     },
   },
   modules: ["@nuxtjs/tailwindcss"],
+  typescript: {
+    tsConfig: {
+      compilerOptions: {
+        types: [join(cwd, "./shared/types/global.d.ts")],
+      },
+    },
+  },
 });

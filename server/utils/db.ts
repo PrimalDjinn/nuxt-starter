@@ -276,3 +276,5 @@ export const updateConflictedColumns = <
     return acc;
   }, {} as Record<Q, SQL>);
 };
+
+log.info

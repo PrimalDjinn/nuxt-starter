@@ -1,8 +1,5 @@
 import { createConsola, type ConsolaInstance } from "consola";
 
-declare global {
-  var log: ConsolaInstance;
-}
 
 export default defineNuxtPlugin(() => {
   if (!import.meta.client) return;
