@@ -1,5 +1,6 @@
-import { Clients, Channels } from "../utils/socket";
-import { type ConsolaInstance } from "consola";
+import type { ConsolaInstance } from "consola";
+import type { Channels, Clients } from "#imports";
+
 declare global {
   /** @plugin 0.logger.ts */
   var log: ConsolaInstance;
