@@ -1,10 +1,5 @@
 import { Clients, Channels } from "../utils/socket";
 
-declare global {
-  var clients: Clients | undefined;
-  var channels: Channels | undefined;
-}
-
 export default defineNitroPlugin(() => {
   global.clients = new Clients();
   global.channels = new Channels();

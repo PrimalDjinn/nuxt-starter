@@ -27,7 +27,7 @@ export default defineNuxtConfig({
   typescript: {
     tsConfig: {
       compilerOptions: {
-        types: [join(cwd, "./shared/types/global.d.ts")],
+        types: ["./shared/types/global.d.ts"],
       },
     },
   },
