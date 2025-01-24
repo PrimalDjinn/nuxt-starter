@@ -9,5 +9,3 @@ declare global {
   /** @plugin 1.socket.ts */
   var channels: Channels;
 }
-
-export {}

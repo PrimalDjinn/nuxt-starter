@@ -34,7 +34,7 @@ export default defineNuxtConfig({
   typescript: {
     tsConfig: {
       compilerOptions: {
-        typeRoots: [join(cwd, "./app/utils/types.d.ts")],
+        typeRoots: ["./app/utils/types.d.ts"],
       },
     },
   },
