@@ -73,8 +73,8 @@ export function hasOwnProperties<T extends Object>(
   if (!obj) return false;
   if (typeof obj !== "object") return false;
   return properties.every((property) => {
-    if (allowNullish) return obj.hasOwnProperty(property);
-    return obj.hasOwnProperty(property) && Boolish<T>(obj[property]);
+    if (allowNullish) return Object.prototype.hasOwnProperty.call(obj, property);
+    return Object.prototype.hasOwnProperty.call(obj, property) && Boolish<T>(obj[property]);
   });
 }
 
