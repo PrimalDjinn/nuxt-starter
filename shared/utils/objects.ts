@@ -27,19 +27,22 @@
  * Boolish("TRUE") // true
  *
  */
-export function Boolish(val: any): null | boolean | string | undefined | any {
+type MaybeValue<T> = T extends undefined
+  ? null | boolean | string | undefined | any
+  : T;
+export function Boolish<T = undefined>(val: any): MaybeValue<T> {
   if (typeof val !== "string") return val;
   val = val.trim().toLowerCase();
   switch (true) {
     case val === "":
     case val === "null":
-      return null;
+      return null as MaybeValue<T>;
     case val === "true":
-      return true;
+      return true as MaybeValue<T>;
     case val === "false":
-      return false;
+      return false as MaybeValue<T>;
     case val === "undefined":
-      return undefined;
+      return undefined as MaybeValue<T>;
     default:
       return val;
   }
