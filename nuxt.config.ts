@@ -27,6 +27,7 @@ export default defineNuxtConfig({
         compilerOptions: {
           typeRoots: ["@types/node", join(cwd, "./server/utils/types.d.ts")],
         },
+        include: [join(cwd, "./app/utils/types.d.ts")],
       },
     },
   },
@@ -36,6 +37,7 @@ export default defineNuxtConfig({
       compilerOptions: {
         typeRoots: [join(cwd, "./app/utils/types.d.ts")],
       },
+      include: [join(cwd, "./app/utils/types.d.ts")],
     },
   },
 });
