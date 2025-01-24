@@ -7,7 +7,7 @@ import {
   type SQL,
   type TableConfig,
 } from "drizzle-orm";
-import consola from "consola";
+import {consola} from "consola";
 import { PgTable, QueryBuilder } from "drizzle-orm/pg-core";
 import { SQLiteTable } from "drizzle-orm/sqlite-core";
 
@@ -276,5 +276,3 @@ export const updateConflictedColumns = <
     return acc;
   }, {} as Record<Q, SQL>);
 };
-
-log.info

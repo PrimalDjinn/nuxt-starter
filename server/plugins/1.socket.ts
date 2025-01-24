@@ -1,11 +1,19 @@
 import { Clients, Channels } from "../utils/socket";
+import { consola } from "consola";
 
-export default defineNitroPlugin(() => {  
+declare global {
+  /** @plugin 1.socket.ts */
+  var clients: Clients;
+  /** @plugin 1.socket.ts */
+  var channels: Channels;
+}
+
+export default defineNitroPlugin(() => {
   global.clients = new Clients();
   global.channels = new Channels();
 
   global.clients!.on("end", (data, client) => {
-    log.info("Client with id:", client.id, "disconnected");
+    consola.info("Client with id:", client.id, "disconnected");
   });
 
   global.clients!.on("error", (error, client) => {

@@ -1,4 +1,5 @@
 import type { H3Event } from "h3"
+import {consola} from "consola"
 
 function announcer() {
     let time_start: number;
@@ -7,7 +8,7 @@ function announcer() {
             time_start = performance.now()
         },
         onBeforeResponse(context: H3Event) {
-            if (!isVercel) log.info(`[${context.node.req.method}]\t${context.node.req.url} - ${(performance.now() - time_start).toLocaleString()}ms`)
+            if (!isVercel) consola.info(`[${context.node.req.method}]\t${context.node.req.url} - ${(performance.now() - time_start).toLocaleString()}ms`)
         }
     }
 }

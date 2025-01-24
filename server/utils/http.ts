@@ -1,4 +1,5 @@
 import type { H3Event, Router, EventHandlerRequest, EventHandlerResponse, EventHandler, EventHandlerObject } from "h3"
+import {consola} from "consola"
 
 type Response<T> = T;
 export function createResponse<T extends object>(
@@ -70,7 +71,7 @@ export const safeEventHandler = <Request extends EventHandlerRequest = EventHand
 
 export function useController(folderName: string, router: Router) {
     router.use('/**', defineEventHandler((event: H3Event) => {
-        log.warn(`Unknown route: [${event.method}] ${event.path} was attempted to be accessed`)
+        consola.warn(`Unknown route: [${event.method}] ${event.path} was attempted to be accessed`)
         return createError({
             status: 404,
             message: "The requested route does not exist."
