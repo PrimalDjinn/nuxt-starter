@@ -78,6 +78,16 @@ export function hasOwnProperties<T extends Object>(
   });
 }
 
+/**
+ * Use sparingly
+ * @param size
+ */
+export function* range(size: number) {
+  for (let i = 0; i < size; i++) {
+    yield i;
+  }
+}
+
 type KeyValue<T> = { [K in keyof T]: T[K] };
 type FinderFunction<T> = (arg: T, index: number, arr: T[]) => boolean;
 type Finder<T> = T extends object ? Partial<KeyValue<T>> | boolean : undefined;
