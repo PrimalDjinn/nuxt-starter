@@ -37,8 +37,8 @@ export function decrypt(data: string, key: string) {
     const decipher = createDecipheriv("aes-256-cbc", getKey(key), iv);
     let decrypted = decipher.update(encryptedData, "hex", "utf8");
     decrypted += decipher.final("utf8");
-    return { data: decrypted, error: null };
+    return { data: decrypted, error: undefined };
   } catch (error) {
-    return { data: null, error };
+    return { data: undefined, error };
   }
 }
