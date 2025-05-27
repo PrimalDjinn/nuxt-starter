@@ -1,0 +1,16 @@
+{
+  "github.copilot.enable": {
+    "*": false
+  },
+  "files.associations": {
+    "*tailwind.css": "tailwindcss"
+  },
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "editor.gotoLocation.multipleDefinitions": "goto",
+  "editor.foldingImportsByDefault": true,
+  "vite.vitepress": false,
+  "i18n-ally.localesPaths": ["./app/locales"],
+  "i18n-ally.enabledFrameworks": ["vue"]
+}

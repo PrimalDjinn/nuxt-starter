@@ -1,6 +1,6 @@
 import { ulid } from "ulid";
 import { H3Event, type EventStream } from "h3";
-import { Peer } from "crossws";
+import type { Peer } from "crossws";
 
 /* TODO: Production considerations
  * - Ensure auto remove clients from channels on disconnect, or dump to redis

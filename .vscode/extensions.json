@@ -1,0 +1,24 @@
+{
+  "recommendations": [
+    "antfu.goto-alias",
+    "chwoerz.type-buddy",
+    "atommaterial.a-file-icon-vscode",
+    "usernamehw.errorlens",
+    "mikestead.dotenv",
+    "github.vscode-github-actions",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "wayou.vscode-todo-highlight",
+    "vue.volar",
+    "shd101wyy.markdown-preview-enhanced",
+    "christian-kohler.path-intellisense",
+    "doggy8088.quicktype-refresh",
+    "jock.svg",
+    "redhat.vscode-yaml",
+    "irongeek.vscode-env",
+    "yoavbls.pretty-ts-errors",
+    "alimozdemir.vscode-nuxt-dx-tools",
+    "eamodio.gitlens",
+    "lokalise.i18n-ally"
+  ]
+}

@@ -4,7 +4,9 @@ type MergeTypes<TypesArray extends any[], Res = {}> = TypesArray extends [
 ]
   ? MergeTypes<Rem, Res & Head>
   : Res;
+
 type OnlyFirst<F, S> = F & { [Key in keyof Omit<S, keyof F>]?: never };
+
 export type OneOf<
   TypesArray extends any[],
   Res = never,

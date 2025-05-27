@@ -1,4 +1,3 @@
-import consola from "consola";
 import { isDevelopment } from "../../server/utils/env";
 
 type Result<T> = T | undefined;
@@ -58,7 +57,7 @@ export async function useAsyncState<T>(
     initial = data;
   } else {
     if (isDevelopment) {
-      consola.info(
+      console.info(
         "Nuxt instance not found, re-executing initialisation function and discarding results right after." +
           " There is no state thus, results will not be re-used, please check your implementation." +
           " This has a low likelihood of being a Nuxt error, well unless you are an idiot, you idiot."
@@ -71,8 +70,8 @@ export async function useAsyncState<T>(
     const { data: _data, error: _error } = await pull();
     initial.value = _data;
     if (_error) {
-      consola.error("An error occurred while fetching data for", key);
-      consola.error(error.value);
+      console.error("An error occurred while fetching data for", key);
+      console.error(error.value);
       error.value = _error;
 
       if (

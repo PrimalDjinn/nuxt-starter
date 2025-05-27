@@ -15,15 +15,14 @@
     "@nuxt/eslint": "latest",
     "@nuxtjs/tailwindcss": "6.13.1",
     "drizzle-kit": "^0.28.1",
-    "eslint": "^9.14.0",
-    "nuxt": "^3.15.2",
-    "typescript": "^5.6.3",
+    "eslint": "^9.27.0",
+    "nuxt": "^3.17.4",
+    "typescript": "^5.8.3",
     "vue": "latest"
   },
   "bin": "./script.js",
-  "packageManager": "pnpm@9.12.0+sha512.4abf725084d7bcbafbd728bfc7bee61f2f791f977fd87542b3579dcb23504d170d46337945e4c66485cd12d588a0c0e570ed9c477e7ccdd8507cf05f3f92eaca",
   "dependencies": {
-    "drizzle-orm": "^0.36.3",
-    "ulid": "^2.3.0"
-  }
+    "ulid": "^2.4.0"
+  },
+  "packageManager": "pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39"
 }

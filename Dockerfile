@@ -1,4 +1,4 @@
-FROM node:20.18
+FROM 24.1-slim
 
 # set working directory
 WORKDIR /nuxt

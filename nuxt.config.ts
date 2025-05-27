@@ -22,20 +22,5 @@ export default defineNuxtConfig({
     imports: {
       dirs: [join(cwd, "./shared/utils"), join(cwd, "./shared/types")],
     },
-    typescript: {
-      tsConfig: {
-        compilerOptions: {
-          typeRoots: ["@types/node", join(cwd, "./server/utils/types.d.ts")],
-        },
-      },
-    },
-  },
-  modules: ["@nuxtjs/tailwindcss"],
-  typescript: {
-    tsConfig: {
-      compilerOptions: {
-        typeRoots: [join(cwd, "./app/utils/types.d.ts")],
-      },
-    },
   },
 });

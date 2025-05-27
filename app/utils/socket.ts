@@ -1,5 +1,3 @@
-import consola from "consola";
-
 type Events = {
   data: Array<(data: SocketTemplate) => void>;
   error: Array<(error: Error | Event) => void>;
@@ -16,7 +14,7 @@ function emitter<K extends keyof Events>(
   if (type === "json") {
     context.events[event].forEach((callback) => callback(data as any));
   } else {
-    consola.warn("Unexpected data received over the wire.", data);
+    console.warn("Unexpected data received over the wire.", data);
     context.events[event].forEach((callback) => callback(data as any));
   }
 }
@@ -192,7 +190,7 @@ class Poll implements _RealTime {
         return response;
       })
       .catch((error) => {
-        consola.error("Upload Poll Error", error);
+        console.error("Upload Poll Error", error);
         return false;
       });
   }
@@ -364,11 +362,11 @@ export class RealTime {
     };
     rt.on("open", () => {
       this.status = SocketStatus.OPEN;
-      consola.success("RealTime connection established via", rt.type);
+      console.log("RealTime connection established via", rt.type);
     });
     rt.on("close", () => {
       if (this.status === SocketStatus.SHUTDOWN) {
-        consola.info(
+        console.info(
           "The close method was called which SHUTDOWN the RealTime, if this was unintended, set the _RealTime.status to CLOSED and try again"
         );
         return;

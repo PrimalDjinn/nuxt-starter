@@ -1,5 +1,5 @@
 import type { Peer } from "crossws";
-import { consola } from "consola";
+
 
 export default defineWebSocketHandler({
   open(peer: Peer) {
@@ -18,12 +18,12 @@ export default defineWebSocketHandler({
     const client = new WsClient(peer, SocketStatus.CLOSED);
     client.emit("end", event);
     client.close();
-    consola.warn("Force closing Ws Connection");
+    console.warn("Force closing Ws Connection");
   },
   error(peer: Peer, error) {
     const client = new WsClient(peer, SocketStatus.CLOSED);
     client.emit("error", error);
     client.close();
-    consola.warn("Force closing Ws Connection");
+    console.warn("Force closing Ws Connection");
   },
 });
