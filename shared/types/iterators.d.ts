@@ -10,3 +10,5 @@ export type GeneratorReturn<T extends Generator | AsyncGenerator> =
     : T extends AsyncGenerator<any, infer R, any>
     ? R
     : never;
+
+export type IterableKind<T = any> = T[] | MapIterator<T> | Generator<T>;
