@@ -12,26 +12,30 @@ export type TypeAtKeysPath<T, P> = P extends `${infer K}.${infer Rest}`
   ? T[P]
   : never;
 
-export type Ommit<T, P extends Keys<T>> = P extends `${infer K}.${infer Rest}`
-  ? K extends keyof T
-    ? {
-        [Key in keyof T as Key extends K ? Key : never]: Ommit<
-          T[K],
-          Extract<Rest, Keys<T[K]>>
-        >;
-      } & Omit<T, K>
-    : T
-  : Omit<T, P>;
-
-export type PPick<T, P extends Keys<T>> = P extends `${infer K}.${infer Rest}`
-  ? K extends keyof T
-    ? {
-        [Key in K]: PPick<T[K], Extract<Rest, Keys<T[K]>>>;
-      }
+export type PPick<T, P extends Keys<T>> = UnionToIntersection<
+  P extends `${infer K}.${infer Rest}`
+    ? K extends keyof T
+      ? {
+          [Key in K]: PPick<T[K], Extract<Rest, Keys<T[K]>>>;
+        }
+      : never
+    : P extends keyof T
+    ? { [Key in P]: T[Key] }
     : never
-  : P extends keyof T
-  ? { [Key in P]: T[Key] }
-  : never;
+>;
+
+export type Ommit<T, P extends Keys<T>> = UnionToIntersection<
+  P extends `${infer K}.${infer Rest}`
+    ? K extends keyof T
+      ? {
+          [Key in keyof T as Key extends K ? Key : never]: Ommit<
+            T[K],
+            Extract<Rest, Keys<T[K]>>
+          >;
+        } & Omit<T, K>
+      : T
+    : Omit<T, P>
+>;
 
 export type SmartKeys<T> = (keyof T & string) | (string & {});
 

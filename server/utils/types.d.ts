@@ -1,6 +1,6 @@
 declare global {
   /** @plugin 1.socket.ts */
-  var clients: Clients;
+  let clients: Clients;
   /** @plugin 1.socket.ts */
-  var channels: Channels;
+  let channels: Channels;
 }

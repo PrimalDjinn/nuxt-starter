@@ -16,14 +16,14 @@ type Result<T, E = Error | CatchError> =
 type PromiseResult<T, E> = Promise<
   T extends Promise<infer U> ? Result<U, T["catch"]> : Result<T, E>
 >;
-export default function execute<F extends (...args: any[]) => any, E = Error>(
+export function execute<F extends (...args: any[]) => any, E = Error>(
   fun: F,
   ...args: Parameters<F>
 ): Result<ReturnType<F>, E>;
-export default async function execute<T, E = Error>(
+export async function execute<T, E = Error>(
   promise: Promise<T>
 ): PromiseResult<Promise<T>, E>;
-export default function execute(arg: any, ...args: any[]) {
+export function execute(arg: any, ...args: any[]) {
   if (isPromise(arg)) {
     return arg
       .then((v) => ({ result: v, error: undefined }))

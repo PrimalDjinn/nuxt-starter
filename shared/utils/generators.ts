@@ -1,3 +1,5 @@
+import { isPromise } from "./execute";
+
 export function isAsyncGenerator(gen: any): gen is AsyncGenerator {
   // Check if it has the right structure without calling .next()
   return (
