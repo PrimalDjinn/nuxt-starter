@@ -1,3 +1,5 @@
+/// <reference types="./types.d.ts" />
+
 import { ulid } from "ulid";
 import { H3Event, type EventStream } from "h3";
 import type { Peer } from "crossws";

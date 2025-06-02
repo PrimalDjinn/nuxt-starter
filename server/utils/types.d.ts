@@ -1,6 +1,10 @@
+import type { Clients, Channels } from "./socket";
+
+export {};
+
 declare global {
   /** @plugin 1.socket.ts */
-  let clients: Clients;
+  var clients: Clients;
   /** @plugin 1.socket.ts */
-  let channels: Channels;
+  var channels: Channels;
 }
