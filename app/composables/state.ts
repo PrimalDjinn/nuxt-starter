@@ -1,4 +1,4 @@
-import { isDevelopment } from "../../server/utils/env";
+import { isDevelopment } from "../../shared/utils/env";
 
 type Result<T> = T | undefined;
 type Error = Ref<any | undefined>;

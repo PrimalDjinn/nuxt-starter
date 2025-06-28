@@ -1,3 +1,5 @@
+import type { IterableKind } from "../types/iterators";
+
 interface QNode<T> {
   next?: QNode<T>;
   prev?: QNode<T>;

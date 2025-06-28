@@ -6,8 +6,6 @@ import tailwindcss from "@tailwindcss/vite";
 const cwd = dirname(fileURLToPath(import.meta.url));
 
 export default defineNuxtConfig({
-  devtools: { enabled: true },
-
   imports: {
     dirs: [join(cwd, "../shared/types"), join(cwd, "../shared/utils")],
   },
