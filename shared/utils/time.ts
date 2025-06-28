@@ -1,12 +1,12 @@
-export function SECONDS(time: number, unit: "hr" | "min" | "ms") {
+export function toMilliSeconds(time: number, unit: "hr" | "min" | "ms" | "s") {
   switch (unit) {
     case "hr":
-      return time * 60 * 60; // 1 hour = 3600 seconds
+      return 1000 * 60 * 60 * time;
     case "min":
-      return time * 60; // 1 minute = 60 seconds
-    case "ms":
-      return time / 1000; // 1 millisecond = 1/1000 seconds
+      return 1000 * 60 * time;
+    case "s":
+      return time * 1000;
     default:
-      throw new Error("Invalid time unit specified");
+      throw new Error("No time input unit specified");
   }
 }
