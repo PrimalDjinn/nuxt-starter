@@ -1,10 +1,5 @@
-export function useRouteQuery(
-  key: string,
-  array: true
-): WritableComputedRef<string[]>;
-export function useRouteQuery(
-  key: string
-): WritableComputedRef<string | undefined>;
+export function useRouteQuery(key: string, array: true): WritableComputedRef<string[]>;
+export function useRouteQuery(key: string): WritableComputedRef<string | undefined>;
 export function useRouteQuery(key: string, array = false) {
   const route = useRoute();
   return computed({
@@ -17,9 +12,7 @@ export function useRouteQuery(key: string, array = false) {
 
         return value?.toString();
       } else {
-        return Array.isArray(value)
-          ? value.map((v) => v?.toString())
-          : [value?.toString()];
+        return Array.isArray(value) ? value.map((v) => v?.toString()) : [value?.toString()];
       }
     },
     set(value) {
