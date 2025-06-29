@@ -14,7 +14,6 @@
   "devDependencies": {
     "@nuxt/eslint": "latest",
     "@tailwindcss/vite": "^4.1.8",
-    "drizzle-kit": "^0.28.1",
     "eslint": "^9.27.0",
     "nuxt": "^3.17.4",
     "typescript": "^5.8.3",
