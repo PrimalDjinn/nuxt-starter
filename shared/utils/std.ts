@@ -249,3 +249,10 @@ export function binarySearch<T>(arr: Array<T>, target: SearchTarget<T>): number 
 
   return -1;
 }
+
+
+export type None = undefined | null;
+export function isNone(v: any): v is undefined | null {
+  return v === undefined || v === null;
+}
+
