@@ -1,5 +1,7 @@
-import { consola } from "consola";
 import type { ShallowRef } from "vue";
+import { isNone, type None } from "~/utils/std/tools";
+import type { JSFunction, MaybePromise } from "~~/shared/types/utils";
+import { execute, isPromise } from "~~/shared/utils/execute";
 
 async function fill_return<T>(
   promise: Promise<T> | Awaited<ReturnType<typeof execute>>,
@@ -14,9 +16,7 @@ async function fill_return<T>(
     return;
   }
 
-  const { result, error } = isPromise(promise)
-    ? await execute(promise)
-    : promise;
+  const { result, error } = isPromise(promise) ? await execute(promise) : promise;
   if (result) {
     // @ts-expect-error
     _return.data.value = toValue(result);
@@ -27,18 +27,17 @@ async function fill_return<T>(
   }
 }
 
-interface AsyncState<T> {
-  data: ShallowRef<T | undefined> | Ref<T, undefined>;
-  error: ShallowRef<Error | undefined> | Ref<Error, undefined>;
-}
-export default async function useAsyncState<T>(
-  key: string,
-  init?: JSFunction<MaybePromise<T>>
-): Promise<AsyncState<T>>;
-export default async function useAsyncState<T>(
-  key: string,
-  options?: { deep?: boolean }
-): Promise<AsyncState<T>>;
+type AsyncState<T> =
+  | {
+      data: Ref<T>;
+      error: Ref<undefined>;
+    }
+  | {
+      data: Ref<undefined>;
+      error: Ref<Error>;
+    };
+export default async function useAsyncState<T>(key: string, init?: JSFunction<MaybePromise<T>>): Promise<AsyncState<T>>;
+export default async function useAsyncState<T>(key: string, options?: { deep?: boolean }): Promise<AsyncState<T>>;
 export default async function useAsyncState<T>(
   key: string,
   init?: JSFunction<MaybePromise<T>>,
@@ -73,7 +72,7 @@ export default async function useAsyncState<T>(
 
   if (tryUseNuxtApp()) {
     const existing = useState<Promise<T>>(key);
-    if (existing.value) {
+    if (await existing.value) {
       await fill_return(existing.value, _return);
       return _return;
     }
@@ -83,7 +82,10 @@ export default async function useAsyncState<T>(
           if (options.deep) {
             return await init();
           } else {
-            const data = await init();
+            const { result: data, error } = await execute(init);
+            if (error) {
+              consola.fatal(error);
+            }
             const result = toValue(data);
             return shallowRef(result);
           }
