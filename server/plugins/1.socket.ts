@@ -4,11 +4,11 @@ export default defineNitroPlugin(() => {
   global.clients = new Clients();
   global.channels = new Channels();
 
-  global.clients!.on("end", (data, client) => {
+  global.clients.on("end", (data, client) => {
     console.info("Client with id:", client.id, "disconnected");
   });
 
-  global.clients!.on("error", (error, client) => {
+  global.clients.on("error", (error, client) => {
     const response = {
       statusCode: 400,
       type: TYPE.ERROR,

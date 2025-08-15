@@ -10,10 +10,6 @@ export default defineNuxtConfig({
     dirs: [join(cwd, "../shared/types"), join(cwd, "../shared/utils")],
   },
 
-  future: {
-    compatibilityVersion: 4,
-  },
-
   nitro: {
     experimental: {
       websocket: true,
