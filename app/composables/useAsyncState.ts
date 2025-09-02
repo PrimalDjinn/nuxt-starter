@@ -1,5 +1,7 @@
 import type { ShallowRef } from "vue";
-import { consola } from "consola";
+import { isNone } from "~/utils/std/tools";
+import type { JSFunction, MaybePromise } from "~~/shared/types/utils";
+import { execute } from "~~/shared/utils/execute";
 
 async function fill_return<T>(
   promise: Promise<T> | Awaited<T>,
@@ -37,41 +39,35 @@ type SuccessState<T> = {
   status: Ref<"success">;
   data: Ref<T>;
   error: Ref<undefined>;
+  refresh: JSFunction;
 };
 
 type ErrorState = {
   status: Ref<"error">;
   data: Ref<undefined>;
   error: Ref<Error>;
+  refresh: JSFunction;
 };
 
 type LoadingState<T> = {
   status: Ref<"loading">;
   data: Ref<T | undefined>;
   error: Ref<Error | undefined>;
+  refresh: JSFunction;
 };
 
 type IdleState<T> = {
   status: Ref<"idle">;
   data: Ref<undefined>;
   error: Ref<undefined>;
+  refresh: JSFunction;
 };
 
-export type AsyncState<T> =
-  | IdleState<T>
-  | LoadingState<T>
-  | SuccessState<T>
-  | ErrorState;
+export type AsyncState<T> = IdleState<T> | LoadingState<T> | SuccessState<T> | ErrorState;
 
 export type AsyncStateOptions = { deep?: boolean; ttl?: number };
-export default async function useAsyncState<T>(
-  key: string,
-  init?: JSFunction<MaybePromise<T>>
-): Promise<AsyncState<T>>;
-export default async function useAsyncState<T>(
-  key: string,
-  options?: AsyncStateOptions
-): Promise<AsyncState<T>>;
+export default async function useAsyncState<T>(key: string, init?: JSFunction<MaybePromise<T>>): Promise<AsyncState<T>>;
+export default async function useAsyncState<T>(key: string, options?: AsyncStateOptions): Promise<AsyncState<T>>;
 export default async function useAsyncState<T>(
   key: string,
   init?: JSFunction<MaybePromise<T>>,
@@ -95,12 +91,6 @@ export default async function useAsyncState<T>(
   if (isNone(options)) options = {};
   if (isNone(options.deep)) options.deep = false;
 
-  const _return = {
-    status: ref<AsyncStatus>("idle"),
-    data: options.deep ? ref() : shallowRef(),
-    error: options.deep ? ref() : shallowRef(),
-  } as AsyncState<T>;
-
   const fn = init
     ? async () => {
         _return.status.value = "loading";
@@ -108,24 +98,32 @@ export default async function useAsyncState<T>(
           return await init();
         } else {
           const { result: data, error } = await execute(init);
-          if (error) consola.fatal(error);
+          if (error) console.error(error);
           const result = toValue(data);
           return shallowRef(result);
         }
       }
     : undefined;
 
-  if (tryUseNuxtApp()) {
+  const _return = {
+    status: ref<AsyncStatus>("idle"),
+    data: options.deep ? ref() : shallowRef(),
+    error: options.deep ? ref() : shallowRef(),
+    refresh() {
+      console.warn("No refresh function");
+    },
+  } as AsyncState<T>;
+
+  const promise = useState(key, fn);
+  const commit = async () => {
     const _awaited = await useState<Promise<T>>(key).value;
     const existing = toValue(_awaited);
     if (existing) {
       await fill_return(existing, _return);
-      return _return;
+      return;
     }
 
-    const promise = useState(key, fn);
-
-    if (fn && promise.value && !(await promise.value)) {
+    if (fn && (!promise.value || !(await promise.value))) {
       promise.value = fn();
     }
 
@@ -136,23 +134,20 @@ export default async function useAsyncState<T>(
     }
 
     await fill_return(promise.value, _return);
+  };
 
-    watch(
-      promise,
-      (promise) => {
-        fill_return(promise, _return);
-      },
-      options
-    );
+  await commit();
+  watch(
+    promise,
+    (promise) => {
+      fill_return(promise, _return);
+    },
+    options
+  );
 
-    return _return;
-  }
-
-  consola.warn("No nuxt instance available");
-  if (init) {
-    await fill_return(execute(init) as any, _return);
-  } else {
-    consola.fatal("No init function provided");
-  }
+  _return.refresh = () => {
+    useState(key).value = undefined;
+    commit();
+  };
   return _return;
 }
