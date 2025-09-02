@@ -1,7 +1,4 @@
 import type { ShallowRef } from "vue";
-import { isNone } from "~/utils/std/tools";
-import type { JSFunction, MaybePromise } from "~~/shared/types/utils";
-import { execute } from "~~/shared/utils/execute";
 
 async function fill_return<T>(
   promise: Promise<T> | Awaited<T>,
@@ -63,11 +60,21 @@ type IdleState<T> = {
   refresh: JSFunction;
 };
 
-export type AsyncState<T> = IdleState<T> | LoadingState<T> | SuccessState<T> | ErrorState;
+export type AsyncState<T> =
+  | IdleState<T>
+  | LoadingState<T>
+  | SuccessState<T>
+  | ErrorState;
 
 export type AsyncStateOptions = { deep?: boolean; ttl?: number };
-export default async function useAsyncState<T>(key: string, init?: JSFunction<MaybePromise<T>>): Promise<AsyncState<T>>;
-export default async function useAsyncState<T>(key: string, options?: AsyncStateOptions): Promise<AsyncState<T>>;
+export default async function useAsyncState<T>(
+  key: string,
+  init?: JSFunction<MaybePromise<T>>
+): Promise<AsyncState<T>>;
+export default async function useAsyncState<T>(
+  key: string,
+  options?: AsyncStateOptions
+): Promise<AsyncState<T>>;
 export default async function useAsyncState<T>(
   key: string,
   init?: JSFunction<MaybePromise<T>>,
