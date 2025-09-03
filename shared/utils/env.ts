@@ -28,3 +28,8 @@ export const isDevelopment = checkDevelopment();
 
 /** Detect whether the app is running in production mode */
 export const isProduction = !isDevelopment;
+export const isWebWorker =
+  typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+export const isServiceWorker =
+  typeof ServiceWorkerGlobalScope !== "undefined" &&
+  self instanceof ServiceWorkerGlobalScope;
