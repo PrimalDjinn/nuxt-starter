@@ -1,4 +1,6 @@
+import type { MaybeArray } from "../types/array";
 import type { IterableKind } from "../types/iterators";
+import { values } from "./objects";
 
 interface QNode<T> {
   next?: QNode<T>;
@@ -60,7 +62,10 @@ export class Queue<T> {
   }
 }
 
-export function debounce<T extends (...args: any[]) => any>(func: T, delay: number = 200) {
+export function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  delay: number = 200
+) {
   let timer: ReturnType<typeof setTimeout> | null = null;
   let lastArgs: Parameters<T> | null = null;
   let lastResult: ReturnType<T>;
@@ -81,7 +86,10 @@ export function debounce<T extends (...args: any[]) => any>(func: T, delay: numb
   };
 }
 
-export function throttle<T extends (...args: any[]) => any>(func: T, limit: number) {
+export function throttle<T extends (...args: any[]) => any>(
+  func: T,
+  limit: number
+) {
   let lastCall = 0;
   let lastResult: ReturnType<T>;
   return (...args: Parameters<T>): ReturnType<T> => {
@@ -182,6 +190,129 @@ export function isIterable<T = any>(obj: unknown): obj is Iterable<T> {
   return obj != null && typeof (obj as any)[Symbol.iterator] === "function";
 }
 
+export function peek<T>(item?: T[]): T | undefined;
+export function peek<T>(item?: Set<T>): T | undefined;
+export function peek<K, V>(item?: Map<K, V>): V | undefined;
+export function peek<TGen extends Generator<any, any, any>>(
+  item?: TGen
+): GeneratorValue<TGen> | undefined;
+export function peek<TGen extends AsyncGenerator<any, any, any>>(
+  item?: TGen
+): Promise<GeneratorValue<TGen> | undefined>;
+export function peek<T>(item?: MaybeArray<T>): UnArray<T> | undefined;
+export function peek(item: any): any {
+  if (Array.isArray(item)) {
+    return item.at(0);
+  }
+
+  if (item instanceof Map || item instanceof Set) {
+    return item.values().next().value;
+  }
+
+  if (isGenerator(item) || isAsyncGenerator(item)) {
+    const nextResult = item.next();
+
+    const isNextPromise = isPromise(nextResult);
+    const first = isNextPromise
+      ? nextResult.then((r) => r.value)
+      : nextResult.value;
+
+    let usedFirst = false;
+    const originalNext = item.next.bind(item);
+
+    // @ts-ignore
+    item.next = function (...args: any[]) {
+      if (!usedFirst) {
+        usedFirst = true;
+        return isNextPromise
+          ? Promise.resolve({ value: first, done: false })
+          : { value: first, done: false };
+      }
+      // @ts-ignore
+      return originalNext(...args);
+    };
+
+    return first;
+  }
+
+  if (typeof item !== "string" && isIterable(item)) {
+    for (const first of item) {
+      return first;
+    }
+  }
+
+  if (typeof item === "object") {
+    return values(item).next().value;
+  }
+
+  return item;
+}
+
+export function take<T>(item: T[], n: number): T[];
+export function take<T>(item: Set<T>, n: number): T[];
+export function take<K, V>(item: Map<K, V>, n: number): V[];
+export function take<TGen extends Generator<any, any, any>>(
+  item: TGen,
+  n: number
+): GeneratorValue<TGen>[];
+export function take<TGen extends AsyncGenerator<any, any, any>>(
+  item: TGen,
+  n: number
+): Promise<GeneratorValue<TGen>[]>;
+export function take<T>(item: MaybeArray<T>, n: number): T[];
+export function take(item: any, n: number): any {
+  if (n <= 0) return [];
+
+  // Arrays
+  if (Array.isArray(item)) {
+    return item.slice(0, n);
+  }
+
+  // Sets and Maps
+  if (item instanceof Set) {
+    return Array.from(item).slice(0, n);
+  }
+  if (item instanceof Map) {
+    return Array.from(item.values()).slice(0, n);
+  }
+
+  // Sync Generator
+  if (isGenerator(item)) {
+    const result: any[] = [];
+    for (let i = 0; i < n; i++) {
+      const next = item.next();
+      if (next.done) break;
+      result.push(next.value);
+    }
+    return result;
+  }
+
+  // Async Generator
+  if (isAsyncGenerator(item)) {
+    return (async () => {
+      const result: any[] = [];
+      for await (const value of item) {
+        result.push(value);
+        if (result.length >= n) break;
+      }
+      return result;
+    })();
+  }
+
+  // Iterables
+  if (typeof item !== "string" && isIterable(item)) {
+    return Array.from(item).slice(0, n);
+  }
+
+  // Primitive or Object
+  if (typeof item === "object" && item !== null) {
+    return Object.values(item).slice(0, n);
+  }
+
+  // Fallback for non-iterables
+  return [item];
+}
+
 export function toArray<T>(
   items: T | IterableKind<T> | Map<any, any> | undefined
 ): T extends Map<infer K, infer V> ? [K, V][] : T[] {
@@ -207,8 +338,14 @@ type Comparator<T> = (item: T, operation: Operation) => boolean;
 type SearchTarget<T> = OneOf<[T, Comparator<T>]>;
 
 export function binarySearch<T>(arr: Array<T>, target: T): number;
-export function binarySearch<T>(arr: Array<T>, comparator: Comparator<T>): number;
-export function binarySearch<T>(arr: Array<T>, target: SearchTarget<T>): number {
+export function binarySearch<T>(
+  arr: Array<T>,
+  comparator: Comparator<T>
+): number;
+export function binarySearch<T>(
+  arr: Array<T>,
+  target: SearchTarget<T>
+): number {
   let low = 0;
   let high = arr.length - 1;
 
@@ -250,9 +387,7 @@ export function binarySearch<T>(arr: Array<T>, target: SearchTarget<T>): number 
   return -1;
 }
 
-
 export type None = undefined | null;
 export function isNone(v: any): v is undefined | null {
   return v === undefined || v === null;
 }
-
