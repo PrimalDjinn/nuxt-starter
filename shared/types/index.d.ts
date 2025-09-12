@@ -37,3 +37,5 @@ export type UnionToIntersection<U> = (
 ) extends (k: infer I) => void
   ? I
   : never;
+
+  export type SmartString<T> = (T & string) | (string & {});

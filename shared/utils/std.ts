@@ -391,3 +391,95 @@ export type None = undefined | null;
 export function isNone(v: any): v is undefined | null {
   return v === undefined || v === null;
 }
+
+
+export async function settle<T extends readonly unknown[]>(
+  promises: readonly [...{ [K in keyof T]: Promise<T[K]> }]
+): Promise<{ [K in keyof T]: T[K] | undefined }> {
+  const results = await Promise.allSettled(promises);
+
+  return results.map((result, index) => {
+    if (result.status === "fulfilled") {
+      return result.value;
+    } else {
+      const log = (globalThis as any).consola || console;
+      log.error(`Promise at index ${index} failed:`, result.reason);
+      console.error("An error occured: " + result.reason);
+      return undefined;
+    }
+  }) as { [K in keyof T]: T[K] | undefined };
+}
+
+/**
+ * Safe wrapper for Promise.race with a local shim if it's not available.
+ */
+export async function race<T extends readonly unknown[]>(
+  promises: readonly [...{ [K in keyof T]: Promise<T[K]> }]
+): Promise<T[number]> {
+  if (promises.length === 0) {
+    throw new Error("Promise.race called with no promises");
+  }
+
+  const log = (globalThis as any).consola || console;
+  const raceShim = async (
+    promises: readonly [...{ [K in keyof T]: Promise<T[K]> }]
+  ): Promise<T[number]> => {
+    return new Promise((resolve, reject) => {
+      let settled = false;
+
+      for (const p of promises) {
+        p.then(
+          (value) => {
+            if (!settled) {
+              settled = true;
+              resolve(value);
+            }
+          },
+          (error) => {
+            if (!settled) {
+              settled = true;
+              reject(error);
+            }
+          }
+        );
+      }
+    });
+  };
+
+  try {
+    const raceFn =
+      typeof Promise.race === "function"
+        ? Promise.race.bind(Promise)
+        : raceShim;
+    return await raceFn(promises);
+  } catch (error) {
+    log.error("Promise.race failed:", error);
+    if ((globalThis as any).$alert?.error) {
+      (globalThis as any).$alert.error(
+        "An error occurred: " + (error as Error).message
+      );
+    }
+
+    throw error;
+  }
+}
+
+export function assertTruthy<T>(
+  value: T,
+  message?: string
+): asserts value is NonNullable<T> {
+  if (!value) {
+    throw new Error(
+      message || "Expected value to be truthy, but got falsy value."
+    );
+  }
+}
+
+export function makeThenable<T, S extends object>(
+  source: S,
+  promise: Promise<T>
+) {
+  const thenable = promise.then((x) => x);
+  Object.assign(thenable, source);
+  return thenable as S & Promise<T>;
+}
