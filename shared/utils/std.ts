@@ -1,6 +1,6 @@
 import type { MaybeArray } from "../types/array";
 import type { IterableKind } from "../types/iterators";
-import { _values } from "./objects";
+import { values } from "./objects";
 
 interface QNode<T> {
   next?: QNode<T>;
@@ -242,7 +242,7 @@ export function peek(item: any): any {
   }
 
   if (typeof item === "object") {
-    return _values(item).next().value;
+    return values(item).next().value;
   }
 
   return item;
