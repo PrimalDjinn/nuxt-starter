@@ -1,6 +1,6 @@
 import type { MaybeArray } from "../types/array";
 import type { IterableKind } from "../types/iterators";
-import { values } from "./objects";
+import { _values } from "./objects";
 
 interface QNode<T> {
   next?: QNode<T>;
@@ -242,7 +242,7 @@ export function peek(item: any): any {
   }
 
   if (typeof item === "object") {
-    return values(item).next().value;
+    return _values(item).next().value;
   }
 
   return item;
@@ -391,7 +391,6 @@ export type None = undefined | null;
 export function isNone(v: any): v is undefined | null {
   return v === undefined || v === null;
 }
-
 
 export async function settle<T extends readonly unknown[]>(
   promises: readonly [...{ [K in keyof T]: Promise<T[K]> }]

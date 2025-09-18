@@ -248,7 +248,7 @@ export function isEmpty<T extends Object>(obj: T | any): obj is T {
   return true;
 }
 
-export function* keys<T>(obj: T | None, warn = true): Generator<keyof T> {
+export function* _keys<T>(obj: T | None, warn = true): Generator<keyof T> {
   if (obj instanceof Map) {
     return obj.keys();
   }
@@ -271,7 +271,7 @@ export function* keys<T>(obj: T | None, warn = true): Generator<keyof T> {
   }
 }
 
-export function* entries<T, K extends keyof T>(
+export function* _entries<T, K extends keyof T>(
   obj: T | None,
   warn = true
 ): Generator<[K, T[K]]> {
@@ -283,13 +283,13 @@ export function* entries<T, K extends keyof T>(
     return obj.entries();
   }
 
-  for (const key of keys(obj, warn)) {
+  for (const key of _keys(obj, warn)) {
     // @ts-expect-error
-    yield [key, obj[key]];
+    yield[(key, obj[key])];
   }
 }
 
-export function* values<T, K extends keyof T>(
+export function* _values<T, K extends keyof T>(
   obj: T | None,
   warn = true
 ): Generator<T[K]> {
@@ -301,7 +301,7 @@ export function* values<T, K extends keyof T>(
     return obj.values();
   }
 
-  for (const key of keys(obj, warn)) {
+  for (const key of _keys(obj, warn)) {
     // @ts-expect-error
     yield obj[key];
   }
