@@ -466,7 +466,7 @@ export async function race<T extends readonly unknown[]>(
   }
 }
 
-export function* keys<T>(obj: T | None, warn = true): Generator<keyof T> {
+export const keys = function* <T>(obj: T | None, warn = true): Generator<keyof T> {
   if (obj instanceof Map) {
     return obj.keys();
   }
@@ -487,9 +487,9 @@ export function* keys<T>(obj: T | None, warn = true): Generator<keyof T> {
   for (const key in obj) {
     yield key;
   }
-}
+};
 
-export function* entries<T, K extends keyof T>(
+export const entries = function* <T, K extends keyof T>(
   obj: T | None,
   warn = true
 ): Generator<[K, T[K]]> {
@@ -505,9 +505,9 @@ export function* entries<T, K extends keyof T>(
     // @ts-expect-error
     yield [(key, obj[key])];
   }
-}
+};
 
-export function* values<T, K extends keyof T>(
+export const values = function* <T, K extends keyof T>(
   obj: T | None,
   warn = true
 ): Generator<T[K]> {
@@ -523,7 +523,7 @@ export function* values<T, K extends keyof T>(
     // @ts-expect-error
     yield obj[key];
   }
-}
+};
 
 export function assertTruthy<T>(
   value: T,
