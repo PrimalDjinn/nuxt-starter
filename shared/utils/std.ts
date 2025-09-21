@@ -190,17 +190,20 @@ export function isIterable<T = any>(obj: unknown): obj is Iterable<T> {
   return obj != null && typeof (obj as any)[Symbol.iterator] === "function";
 }
 
-export function peek<T>(item?: T[]): T | undefined;
-export function peek<T>(item?: Set<T>): T | undefined;
-export function peek<K, V>(item?: Map<K, V>): V | undefined;
-export function peek<TGen extends Generator<any, any, any>>(
-  item?: TGen
-): GeneratorValue<TGen> | undefined;
-export function peek<TGen extends AsyncGenerator<any, any, any>>(
-  item?: TGen
-): Promise<GeneratorValue<TGen> | undefined>;
-export function peek<T>(item?: MaybeArray<T>): UnArray<T> | undefined;
-export function peek(item: any): any {
+export interface Peek {
+  <T>(item?: T[]): T | undefined;
+  <T>(item?: Set<T>): T | undefined;
+  <K, V>(item?: Map<K, V>): V | undefined;
+  <TGen extends Generator<any, any, any>>(item?: TGen):
+    | GeneratorValue<TGen>
+    | undefined;
+  <TGen extends AsyncGenerator<any, any, any>>(item?: TGen): Promise<
+    GeneratorValue<TGen> | undefined
+  >;
+  <T>(item?: MaybeArray<T>): UnArray<T> | undefined;
+}
+
+export const peek = ((item: any) => {
   if (Array.isArray(item)) {
     return item.at(0);
   }
@@ -246,21 +249,22 @@ export function peek(item: any): any {
   }
 
   return item;
-}
+}) as Peek;
 
-export function take<T>(item: T[], n: number): T[];
-export function take<T>(item: Set<T>, n: number): T[];
-export function take<K, V>(item: Map<K, V>, n: number): V[];
-export function take<TGen extends Generator<any, any, any>>(
-  item: TGen,
-  n: number
-): GeneratorValue<TGen>[];
-export function take<TGen extends AsyncGenerator<any, any, any>>(
-  item: TGen,
-  n: number
-): Promise<GeneratorValue<TGen>[]>;
-export function take<T>(item: MaybeArray<T>, n: number): T[];
-export function take(item: any, n: number): any {
+export interface Take {
+  <T>(item: T[], n: number): T[];
+  <T>(item: Set<T>, n: number): T[];
+  <K, V>(item: Map<K, V>, n: number): V[];
+  <TGen extends Generator<any, any, any>>(
+    item: TGen,
+    n: number
+  ): GeneratorValue<TGen>[];
+  <TGen extends AsyncGenerator<any, any, any>>(item: TGen, n: number): Promise<
+    GeneratorValue<TGen>[]
+  >;
+  <T>(item: MaybeArray<T>, n: number): T[];
+}
+export const take = ((item: any, n: number) => {
   if (n <= 0) return [];
 
   // Arrays
@@ -311,7 +315,7 @@ export function take(item: any, n: number): any {
 
   // Fallback for non-iterables
   return [item];
-}
+}) as Take;
 
 export function toArray<T>(
   items: T | IterableKind<T> | Map<any, any> | undefined
