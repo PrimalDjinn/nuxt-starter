@@ -1,6 +1,5 @@
 import type { MaybeArray } from "../types/array";
 import type { IterableKind } from "../types/iterators";
-import { values } from "./objects";
 
 interface QNode<T> {
   next?: QNode<T>;
@@ -464,6 +463,65 @@ export async function race<T extends readonly unknown[]>(
     }
 
     throw error;
+  }
+}
+
+export function* keys<T>(obj: T | None, warn = true): Generator<keyof T> {
+  if (obj instanceof Map) {
+    return obj.keys();
+  }
+
+  if (obj instanceof Set) {
+    return obj.keys();
+  }
+
+  if (!obj) {
+    return;
+  }
+
+  if (typeof obj !== "object") {
+    if (warn) console.warn("None object passed to function.", obj);
+    return;
+  }
+
+  for (const key in obj) {
+    yield key;
+  }
+}
+
+export function* entries<T, K extends keyof T>(
+  obj: T | None,
+  warn = true
+): Generator<[K, T[K]]> {
+  if (obj instanceof Map) {
+    return obj.entries();
+  }
+
+  if (obj instanceof Set) {
+    return obj.entries();
+  }
+
+  for (const key of keys(obj, warn)) {
+    // @ts-expect-error
+    yield [(key, obj[key])];
+  }
+}
+
+export function* values<T, K extends keyof T>(
+  obj: T | None,
+  warn = true
+): Generator<T[K]> {
+  if (obj instanceof Map) {
+    return obj.values();
+  }
+
+  if (obj instanceof Set) {
+    return obj.values();
+  }
+
+  for (const key of keys(obj, warn)) {
+    // @ts-expect-error
+    yield obj[key];
   }
 }
 
