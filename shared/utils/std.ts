@@ -316,10 +316,16 @@ export const take = ((item: any, n: number) => {
   return [item];
 }) as Take;
 
-export function toArray<T>(
-  items: T | IterableKind<T> | Map<any, any> | undefined
-): T extends Map<infer K, infer V> ? [K, V][] : T[] {
+
+export function toArray<T extends Map<any, any>>(map: T | None): MapEntries<T>;
+export function toArray<T extends Set<any>>(set: T | None): SetItem<T>[];
+export function toArray<T>(items: T | IterableKind<T> | None): T[];
+export function toArray(items: any) {
   if (!items) return [] as any;
+
+  if (typeof items === "string") {
+    return [items] as any;
+  }
 
   if (Array.isArray(items)) {
     return items as any;
