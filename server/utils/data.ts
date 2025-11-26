@@ -1,4 +1,4 @@
-import { createDecipheriv, createCipheriv, randomBytes } from "node:crypto";
+import { createDecipheriv, createCipheriv, randomBytes } from "crypto";
 
 function getKey(key: string) {
   return Buffer.from(key.padEnd(32, " ").slice(0, 32), "utf-8");
