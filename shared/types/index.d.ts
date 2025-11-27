@@ -39,3 +39,7 @@ export type UnionToIntersection<U> = (
   : never;
 
   export type SmartString<T> = (T & string) | (string & {});
+
+export type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P] | undefined;
+};
