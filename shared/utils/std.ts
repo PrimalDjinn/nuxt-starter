@@ -546,7 +546,15 @@ export function makeThenable<T, S extends object>(
   source: S,
   promise: Promise<T>
 ) {
-  const thenable = promise.then((x) => x);
-  Object.assign(thenable, source);
+  const thenable = new Proxy(source as S & Promise<T>, {
+    get(target, prop, receiver) {
+      if (prop in promise) {
+        // @ts-ignore
+        const value = promise[prop];
+        return typeof value === "function" ? value.bind(promise) : value;
+      }
+      return Reflect.get(target, prop, receiver);
+    },
+  });
   return thenable as S & Promise<T>;
 }

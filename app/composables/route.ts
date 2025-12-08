@@ -161,7 +161,7 @@ export function useRouteParam(key: string, array?: true) {
 //       }
 
 //       if (initial) {
-//         Object.assign(data, new_initial)
+//         Object.assign(data, initial)
 //         return
 //       }
 //     }
