@@ -189,6 +189,14 @@ export function isIterable<T = any>(obj: unknown): obj is Iterable<T> {
   return obj != null && typeof (obj as any)[Symbol.iterator] === "function";
 }
 
+export function isAsyncIterable<T = any>(
+  obj: unknown
+): obj is AsyncIterable<T> {
+  return (
+    obj != null && typeof (obj as any)[Symbol.asyncIterator] === "function"
+  );
+}
+
 export interface Peek {
   <T>(item?: T[]): T | undefined;
   <T>(item?: Set<T>): T | undefined;
@@ -244,7 +252,11 @@ export const peek = ((item: any) => {
   }
 
   if (typeof item === "object") {
-    return values(item).next().value;
+    const next = values(item).next();
+    if (isPromise(next)) {
+      return next.then((r) => r.value);
+    }
+    return next.value;
   }
 
   return item;
@@ -315,7 +327,6 @@ export const take = ((item: any, n: number) => {
   // Fallback for non-iterables
   return [item];
 }) as Take;
-
 
 export function toArray<T extends Map<any, any>>(map: T | None): MapEntries<T>;
 export function toArray<T extends Set<any>>(set: T | None): SetItem<T>[];
@@ -472,16 +483,146 @@ export async function race<T extends readonly unknown[]>(
   }
 }
 
-export const keys = function* <T>(obj: T | None, warn = true): Generator<keyof T> {
+type ExtractValue<T> = T extends Map<any, infer V>
+  ? V
+  : T extends Set<infer V>
+  ? V
+  : T extends (infer V)[]
+  ? V
+  : T extends AsyncGenerator<infer V>
+  ? V
+  : T extends AsyncIterator<infer V>
+  ? V
+  : T extends AsyncIterable<infer V>
+  ? V
+  : T extends Generator<infer V>
+  ? V
+  : T extends Iterator<infer V>
+  ? V
+  : T extends Iterable<infer V>
+  ? V
+  : T extends object
+  ? T[keyof T]
+  : never;
+
+type ExtractKey<T> = T extends Map<infer K, any>
+  ? K
+  : T extends Set<infer V>
+  ? V
+  : T extends any[]
+  ? number
+  : T extends object
+  ? keyof T
+  : never;
+
+type ExtractEntry<T> = T extends Map<infer K, infer V>
+  ? [K, V]
+  : T extends Set<infer V>
+  ? [V, V]
+  : T extends (infer V)[]
+  ? [number, V]
+  : T extends AsyncGenerator<infer V>
+  ? [number, V]
+  : T extends AsyncIterator<infer V>
+  ? [number, V]
+  : T extends AsyncIterable<infer V>
+  ? [number, V]
+  : T extends Generator<infer V>
+  ? [number, V]
+  : T extends Iterator<infer V>
+  ? [number, V]
+  : T extends Iterable<infer V>
+  ? [number, V]
+  : T extends object
+  ? [keyof T, T[keyof T]]
+  : never;
+
+type ReturnGenerator<T> = T extends
+  | AsyncGenerator<any>
+  | AsyncIterator<any>
+  | AsyncIterable<any>
+  ? AsyncGenerator<ExtractValue<T>>
+  : Generator<ExtractValue<T>>;
+
+type ReturnGeneratorEntry<T> = T extends
+  | AsyncGenerator<any>
+  | AsyncIterator<any>
+  | AsyncIterable<any>
+  ? AsyncGenerator<ExtractEntry<T>>
+  : Generator<ExtractEntry<T>>;
+
+type ExtractPeekValue<T> = T extends (infer V)[]
+  ? V
+  : T extends Set<infer V>
+  ? V
+  : T extends Map<any, infer V>
+  ? V
+  : T extends Generator<infer V, any, any>
+  ? V
+  : T extends AsyncGenerator<infer V, any, any>
+  ? V
+  : T extends Iterator<infer V>
+  ? V
+  : T extends AsyncIterator<infer V>
+  ? V
+  : T extends Iterable<infer V>
+  ? V
+  : T extends AsyncIterable<infer V>
+  ? V
+  : T extends object
+  ? T[keyof T]
+  : T;
+
+type PeekReturn<T> = T extends
+  | AsyncGenerator<any, any, any>
+  | AsyncIterator<any>
+  | AsyncIterable<any>
+  ? Promise<ExtractPeekValue<T> | undefined>
+  : ExtractPeekValue<T> | undefined;
+
+export interface KeysFunc {
+  <T>(obj: T | None, warn?: boolean): Generator<ExtractKey<T>>;
+}
+
+export interface EntriesFunc {
+  <T>(obj: T | None, warn?: boolean): ReturnGeneratorEntry<T>;
+}
+
+export interface ValuesFunc {
+  <T>(obj: T | None, warn?: boolean): ReturnGenerator<T>;
+}
+
+export interface Peek {
+  <T>(item?: T): PeekReturn<T>;
+}
+
+export const keys: KeysFunc = function* <T>(
+  obj: T | None,
+  warn = true
+): Generator<any> {
+  if (!obj) {
+    return;
+  }
+
   if (obj instanceof Map) {
-    return obj.keys();
+    yield* obj.keys();
+    return;
   }
 
   if (obj instanceof Set) {
-    return obj.keys();
+    yield* obj.keys();
+    return;
   }
 
-  if (!obj) {
+  if (Array.isArray(obj)) {
+    for (let i = 0; i < obj.length; i++) {
+      yield i;
+    }
+    return;
+  }
+
+  if (typeof obj === "string") {
+    yield obj;
     return;
   }
 
@@ -490,46 +631,121 @@ export const keys = function* <T>(obj: T | None, warn = true): Generator<keyof T
     return;
   }
 
+  if (isGenerator(obj) || isAsyncGenerator(obj)) {
+    console.error("Generator passed to function.", obj);
+    return;
+  }
+
   for (const key in obj) {
     yield key;
   }
 };
 
-export const entries = function* <T, K extends keyof T>(
+export const entries: EntriesFunc = function* <T>(
   obj: T | None,
   warn = true
-): Generator<[K, T[K]]> {
+): Generator<any> | AsyncGenerator<any> {
   if (obj instanceof Map) {
-    return obj.entries();
+    yield* obj.entries();
+    return;
   }
 
   if (obj instanceof Set) {
-    return obj.entries();
+    yield* obj.entries();
+    return;
+  }
+
+  if (isAsyncGenerator(obj)) {
+    const gen = async function* () {
+      let index = 0;
+      for await (const value of obj) {
+        yield [index++, value] as [number, any];
+      }
+    };
+    return gen() as any;
+  }
+
+  if (isAsyncIterable(obj)) {
+    const gen = async function* () {
+      let index = 0;
+      for await (const value of obj) {
+        yield [index++, value] as [number, any];
+      }
+    };
+    return gen() as any;
+  }
+
+  if (isGenerator(obj)) {
+    let index = 0;
+    for (const value of obj) {
+      yield [index++, value];
+    }
+    return;
+  }
+
+  if (isIterable(obj) && !Array.isArray(obj) && typeof obj !== "string") {
+    let index = 0;
+    for (const value of obj) {
+      yield [index++, value];
+    }
+    return;
   }
 
   for (const key of keys(obj, warn)) {
-    // @ts-expect-error
-    yield [(key, obj[key])];
+    yield [key, (obj as any)[key]];
   }
-};
+} as any;
 
-export const values = function* <T, K extends keyof T>(
+export const values: ValuesFunc = function* <T>(
   obj: T | None,
   warn = true
-): Generator<T[K]> {
+): Generator<any> | AsyncGenerator<any> {
   if (obj instanceof Map) {
-    return obj.values();
+    yield* obj.values();
+    return;
   }
 
   if (obj instanceof Set) {
-    return obj.values();
+    yield* obj.values();
+    return;
+  }
+
+  if (isAsyncGenerator(obj)) {
+    const gen = async function* () {
+      for await (const value of obj) {
+        yield value;
+      }
+    };
+    return gen() as any;
+  }
+
+  if (isAsyncIterable(obj)) {
+    const gen = async function* () {
+      for await (const value of obj) {
+        yield value;
+      }
+    };
+    return gen() as any;
+  }
+
+  if (isGenerator(obj)) {
+    for (const value of obj) {
+      yield value;
+    }
+    return;
+  }
+
+  if (isIterable(obj) && !Array.isArray(obj) && typeof obj !== "string") {
+    for (const value of obj) {
+      yield value;
+    }
+    return;
   }
 
   for (const key of keys(obj, warn)) {
-    // @ts-expect-error
-    yield obj[key];
+    yield (obj as any)[key];
   }
-};
+} as any;
 
 export function assertTruthy<T>(
   value: T,
